@@ -9,6 +9,7 @@
 
 double quad_error(std::vector<std::vector<double>> &data, std::vector<double> &data_y, std::vector<double> &weights){
     double sum = 0;
+    int samples = data.size();
     for (int i =0; i < weights.size(); i++){
         double output = 0;
         for (int j=0; j<data[i].size(); j++){
@@ -16,7 +17,14 @@ double quad_error(std::vector<std::vector<double>> &data, std::vector<double> &d
         }
         sum = sum + pow((output-data_y[i]),2.0);
     }
-    return sum;
+    return sum/samples;
+}
+
+
+void read_weights(std::vector<double> &weights) {
+    for(int i=0; i<weights.size()-1;i++){
+        std::cout << "weights vector is:" << weights[i] << std::endl;
+    }
 }
 
 
@@ -42,40 +50,46 @@ void percepetron(std::vector<std::vector<double>> &data, std::vector<double> &da
 
     /* initializing the weights vector for the first time.*/
     std::vector<double> weights;
-    for (int i = 0; i < data[0].size()+1; i++)
+    for (int i = 0; i < data[0].size()-1; i++)
         weights.push_back(distribution(generator));
+    
+    
     
 
     while(quad_error(data,data_y,weights)>1){
         
         std::cout <<"error:" << '\t' << quad_error(data,data_y,weights) << '\n';
+        read_weights(weights);
 
         //calculating the perceptron output to find the error. 
-        for (int i =0; i < data.size(); i++){
+        for (int i =0; i < data.size()-1; i++){
             double output = 0;
-            for (int j=0; j<data[i].size(); j++){
+            for (int j=0; j<data[i].size()-1; j++){
                 output = output + (data[i][j]*weights[j]);
             }
             //update the weights.
             double error = (data_y[i]- output);
-            for(int k =0; k < weights.size(); k++){
-                weights[k] = weights[k] + error*data[i][k];
+            for(int k =0; k < weights.size()-1; k++){
+                if (error<0){
+                    weights[k] = weights[k] + data[i][k];
+                } else {
+                    weights[k] = weights[k] - data[i][k];
+                }      
             }
         }
     }
-
 }
 
 
 
 int main() {
     std::vector<std::vector<double>> data = {
-        {123,324,324},
-        {99,45,2},
-        {23,34,5}
+        {1,0,0},
+        {0,3,0},
+        {0,0,2}
     };
 
-    std::vector<double> data_y = {1,3,9};
+    std::vector<double> data_y = {1,3,2};
 
     percepetron(data,data_y);
 
